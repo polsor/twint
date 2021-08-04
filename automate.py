@@ -1,7 +1,6 @@
 import twint
 import schedule
 import time
-
 import twint
 import nest_asyncio
 import time
@@ -12,10 +11,12 @@ from dateutil.relativedelta import relativedelta
 from calendar import monthrange
 from collections import Counter
 import sys
+from multiprocessing import Process, Queue
+
+nest_asyncio.apply()
 
 def print_but_better(i):
-	b = f'{i:.<60}'
-	sys.stdout.write('\r'+b)
+	print(f'{i:.<60}', end='|')
 
 def scrape_data(search, since, until, file_name):
 
@@ -28,7 +29,7 @@ def scrape_data(search, since, until, file_name):
     c.Until = str(until)
     c.Store_csv = True
     c.Output = file_name
-    c.Min_likes = 50
+    c.Min_likes = 10
     c.Hide_output = True
     c.Stats = False
 
@@ -55,7 +56,7 @@ def scraper(search, start_date, until_date,name):
 
         scrape_data(search,start_date,end_date,file_name)
 
-        time.sleep(1)
+        time.sleep(0.5)
 
         all_files = list(os.listdir(file_name.split('/')[0]))
 
@@ -63,9 +64,9 @@ def scraper(search, start_date, until_date,name):
             dates_in_file = dates_count(file_name)
             dates_total = monthrange(start_date.year, start_date.month)[1]
 
-            print(f"obtained data for {dates_in_file:d}/{dates_total:d} days".format(width=50), end='\n')
+            print(f"obtained data for {dates_in_file:d}/{dates_total:d} days", end='\n')
         else:
-            print("NO DATA RETRIEVED".format(width=50),end='\n')
+            print("NO DATA RETRIEVED", end='\n')
 		
         start_date = end_date
         i+=1
@@ -105,25 +106,22 @@ def jobtwo():
 
 	scraper(search, start_date, until_date, file_name)
 
-# run once when you start the program
+def start_scraping():    
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+        jobone()
+        jobtwo()
+        schedule.every(3).hour.do(jobone)
+        schedule.every(3).hour.do(jobtwo)
 
-jobone()
-jobtwo()
+def main():
+    p1 = Process(target=start_scraping)
+    p2 = Process(target=start_scraping)
+    p3 = Process(target=start_scraping)
+    p1.start()
+    p2.start()
+    p3.start()
 
-# run every minute(s), hour, day at, day of the week, day of the week and time. Use "#" to block out which ones you don't want to use.  Remove it to active. Also, replace "jobone" and "jobtwo" with your new function names (if applicable)
-
-# schedule.every(1).minutes.do(jobone)
-schedule.every().hour.do(jobone)
-# schedule.every().day.at("10:30").do(jobone)
-# schedule.every().monday.do(jobone)
-# schedule.every().wednesday.at("13:15").do(jobone)
-
-# schedule.every(1).minutes.do(jobtwo)
-schedule.every().hour.do(jobtwo)
-# schedule.every().day.at("10:30").do(jobtwo)
-# schedule.every().monday.do(jobtwo)
-# schedule.every().wednesday.at("13:15").do(jobtwo)
-
-while True:
-  schedule.run_pending()
-  time.sleep(1)
+if __name__=='__main__':
+    main()
