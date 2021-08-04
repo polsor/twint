@@ -17,10 +17,6 @@ def print_but_better(i):
 	b = f'{i:.<60}'
 	sys.stdout.write('\r'+b)
 
-def print_but_much_better(i):
-	b = f'{i:.<60}'
-	sys.stdout.write('\r'+b)
-
 def scrape_data(search, since, until, file_name):
 
     print(f"scraping from {since.strftime('%Y-%m-%d')} to {until.strftime('%Y-%m-%d')}")
