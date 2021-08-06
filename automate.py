@@ -15,6 +15,17 @@ from multiprocessing import Process, Queue
 
 nest_asyncio.apply()
 
+
+
+########################
+## Specify start date ##
+########################
+
+until_date = datetime(2020,1,1)
+start_date = datetime(2018,1,1)
+
+################################################    
+
 def print_but_better(i):
 	print(f'{i:.<60}', end='|')
 
@@ -73,15 +84,6 @@ def scraper(search, start_date, until_date,name):
     
     print("DONE".center(30,'-'))
 
-
-
-until_date = datetime(2021,8,1)
-start_date = datetime(2020,1,1)
-    
-
-
-
-# you can change the name of each "job" after "def" if you'd like.
 def jobone():
 	print ("Fetching BTC Tweets")
 	search = "'Bitcoin' OR 'BTC'"
@@ -112,16 +114,20 @@ def start_scraping():
         time.sleep(1)
         jobone()
         jobtwo()
-        schedule.every(3).hour.do(jobone)
-        schedule.every(3).hour.do(jobtwo)
+        schedule.every(2).hours.do(jobone)
+        schedule.every(2).hours.do(jobtwo)
 
 def main():
+    print('fetching tweets')
+
     p1 = Process(target=start_scraping)
     p2 = Process(target=start_scraping)
     p3 = Process(target=start_scraping)
+    p4 = Process(target=start_scraping)
     p1.start()
     p2.start()
     p3.start()
+    p4.start()
 
 if __name__=='__main__':
     main()
